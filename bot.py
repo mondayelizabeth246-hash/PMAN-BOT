@@ -12,8 +12,9 @@ IMAGE_FILE = "photo_2026-10-06_12-51-51.jpg"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
-    username = user.first_name if user else "ลูกค้า"
+    username = user.first_name if user else "USERNAME"
 
+    # Exact original text provided
     caption = (
         f"สวัสดี {username} ยินดีต้อนรับสู่ เว็บ UFANEXT ตรงจาก UFABET! 🎉\n"
         f"🧧💥 สมัครวันนี้รับเครดิตฟรี 300 บาท หรือฟรีสปิน 300 ครั้ง 💥🧧\n\n"
@@ -27,8 +28,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎲 สมัครสมาชิก", url=REGISTER_URL)],
-        [InlineKeyboardButton("📲 เข้าสู่เว็บไซต์", url=WEBSITE_URL)]
+        [InlineKeyboardButton("🎲 สมัครคลิ๊ก", url=REGISTER_URL)],
+        [InlineKeyboardButton("📲 เว็บ UFANEXT", url=WEBSITE_URL)]
     ])
 
     if os.path.exists(IMAGE_FILE):
@@ -39,7 +40,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     if not BOT_TOKEN:
-        raise ValueError("Please add BOT_TOKEN to your Railway Variables!")
+        raise ValueError("Please set the BOT_TOKEN variable in Railway.")
 
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
