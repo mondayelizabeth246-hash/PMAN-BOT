@@ -3,25 +3,17 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# Enable logging
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO
-)
+logging.basicConfig(level=logging.INFO)
 
-# Fetch Environment Variables
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-REGISTER_URL = os.getenv("REGISTER_URL", "https://ufanext.cc/register/")
-WEBSITE_URL = os.getenv("WEBSITE_URL", "https://ufanext.cc")
+REGISTER_URL = "https://ufanext.cc/register/"
+WEBSITE_URL = "https://ufanext.cc"
+IMAGE_FILE = "photo_2026-10-06_12-51-51.jpg"
 
-# Promotional banner image filename saved in your repository
-IMAGE_FILENAME = "photo_2026-10-06_12-51-51.jpg"
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     username = user.first_name if user else "ลูกค้า"
 
-    # Welcome message caption
     caption = (
         f"สวัสดี {username} ยินดีต้อนรับสู่ เว็บ UFANEXT ตรงจาก UFABET! 🎉\n"
         f"🧧💥 สมัครวันนี้รับเครดิตฟรี 300 บาท หรือฟรีสปิน 300 ครั้ง 💥🧧\n\n"
@@ -34,53 +26,26 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"📲 เว็บ UFANEXT {WEBSITE_URL}"
     )
 
-    # Inline action buttons
-    keyboard = [
+    keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("🎲 สมัครสมาชิก", url=REGISTER_URL)],
-        [InlineKeyboardButton("📲 เข้าสู่เว็บไซต์", url=WEBSITE_URL)],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+        [InlineKeyboardButton("📲 เข้าสู่เว็บไซต์", url=WEBSITE_URL)]
+    ])
 
-    # Check for local image file and send it with caption and buttons
-    if os.path.exists(IMAGE_FILENAME):
-        with open(IMAGE_FILENAME, "rb") as photo_file:
-            await update.message.reply_photo(
-                photo=photo_file,
-                caption=caption,
-                reply_markup=reply_markup
-            )
+    if os.path.exists(IMAGE_FILE):
+        with open(IMAGE_FILE, "rb") as photo:
+            await update.message.reply_photo(photo=photo, caption=caption, reply_markup=keyboard)
     else:
-        # Fallback if image file is not found
-        fallback_image_url = os.getenv("IMAGE_URL", "https://ufanext.cc/logo.png")
-        await update.message.reply_photo(
-            photo=fallback_image_url,
-            caption=caption,
-            reply_markup=reply_markup
-        )
+        await update.message.reply_text(caption, reply_markup=keyboard)
 
-def main() -> None:
+def main():
     if not BOT_TOKEN:
-        raise ValueError("BOT_TOKEN environment variable is not set!")
+        raise ValueError("Please add BOT_TOKEN to your Railway Variables!")
 
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-
-    # Railway server integration (supports Webhook and Long Polling)
-    port = int(os.getenv("PORT", 8080))
-    webhook_url = os.getenv("RAILWAY_STATIC_URL")
-
-    if webhook_url:
-        full_webhook_url = f"https://{webhook_url}/{BOT_TOKEN}"
-        logging.info(f"Setting webhook to {full_webhook_url}")
-        app.run_webhook(
-            listen="0.0.0.0",
-            port=port,
-            url_path=BOT_TOKEN,
-            webhook_url=full_webhook_url
-        )
-    else:
-        logging.info("Starting long polling mode...")
-        app.run_polling()
+    
+    print("Bot is running...")
+    app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()
